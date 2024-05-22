@@ -1,0 +1,36 @@
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind
+metadata:
+  name: book-api-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP # The IP protocol for this port. Supports "TCP", "UDP", and "SCTP".
+      port: 8081 # The port that will be exposed by this service.
+      targetPort: 8080 # The port to access on the pods targeted by the service.
+  #type: NodePort # type of the service.
+  type: LoadBalancer # type of the service.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-book-api #The name of deployment
+spec:
+  replicas: 2 # Number of replicas that will be created for this deployment
+  selector: #Label selector for pods.
+    matchLabels:
+      app: backend
+      environment: dev
+  template:
+    metadata:
+      labels:
+        app: backend
+        environment: dev
+    spec:
+      containers:
+        - name: book-api #container name
+          image: spring-boot-k8s-minikube:latest
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Never #the kubelet does not try fetching the image. If the image is somehow already present locally, the kubelet attempts to start the container; otherwise, startup fails.
